@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{%block title%}
+
+{% endblock %}
+
+{% block main %}
+
+        <form action="/add" method="post" class="form-control">
+            <input type="text" list="stocks" autocomplete="on" placeholder="Symbol" name="symbol"/>
+            <datalist id="stocks" name="symbol">
+                <option value="hjfds">jf</option>
+            </datalist>
+            <select name="transaction_type" id="">
+                <option value="buy">Buy</option>
+                <option value="sell">Sell</option>
+            </select>
+            <input type="number" name="quantity" placeholder="Quantity" size="8">
+            <input type="number" name="price" placeholder="Price per share" size="8">
+            <input type="date" name="date" id="">
+            <button type="submit">Add</button>
+            
+        </form>
+{% endblock %}
