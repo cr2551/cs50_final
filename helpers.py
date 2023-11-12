@@ -112,7 +112,7 @@ def get_portfolio(user_id):
         total_cost_purchase = db.execute('''
                                          SELECT total FROM transactions WHERE user_id = ? AND transaction_type='buy'
                                          AND symbol = ?
-                                         ''', )
+                                         ''', session['user_id'], stock['symbol'])
         # calculate wac: sum(Quantity*Price) / sum(Quantity)
         wac  = total/quantity
         # add it to our portfolio dictionary

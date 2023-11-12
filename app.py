@@ -4,6 +4,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
 
 from helpers import lookup, usd, login_required, apology, get_portfolio
+from cs50 import SQL
+
+db = SQL('sqlite:///project.db')
 
 app = Flask(__name__)
 
@@ -32,50 +35,6 @@ def index():
         date = request.form.get('date')
         return render_template('layout.html', page='home')
     
-@app.route('/add', methods=['GET', 'POST'])
-@login_required
-def add():
-    """ add transaction"""
-    if request.method == 'GET':
-        return render_template('add_transaction.html', page='add')
-    elif request.method == 'POST':
-        symbol = request.form.get('symbol')
-        shares = request.form.get('quantity')
-        transaction_type = request.form.get('transaction_type')
-        price = request.form.get('price')
-        # the price gets automatically converted to an integer when you givc it to the database as input even though
-        # it is a string at the beginning.
-        print(type(price))
-
-        date = request.form.get('date')
-        # input validation
-        if not symbol or  not shares:
-            return apology('Enter both symbol and shares')
-        elif shares.isdigit() == False:
-            return apology('not integer')
-        else:
-            # convert shares to int
-            shares = int(shares)
-            stock = lookup(symbol)
-            if not stock:
-                return apology('symbol not found')
-            symbol = stock['symbol']
-            # remove the following later. only for testing ===============
-            if not price:
-                price = stock['price']
-
-            # if shares are not 1 or more 
-            if shares < 1:
-                return apology('shares must be an integer greater than zero')
-            
-            else:
-                connection = sqlite3.connect('project.db')
-                cursor = connection.cursor()
-                cursor.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date) VALUES (?, ?, ?, ?, ?, ?)', (session['user_id'], symbol, shares, price, transaction_type, date))
-                connection.commit()
-                connection.close()
-                # update portfolio
-                return redirect('/')
             
 
 
@@ -180,3 +139,85 @@ def portfolio():
     portfolio = get_portfolio(session['user_id'])
     print(portfolio)
     return apology('todo')
+
+
+
+
+@app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add():
+    """ add transaction"""
+    if request.method == 'GET':
+        return render_template('add_transaction.html', page='add')
+    elif request.method == 'POST':
+        symbol = request.form.get('symbol')
+        shares = request.form.get('quantity')
+        transaction_type = request.form.get('transaction_type')
+        price = request.form.get('price')
+        # the price gets automatically converted to an integer when you givc it to the database as input even though
+        # it is a string at the beginning.
+        print(type(price))
+
+        date = request.form.get('date')
+        # input validation
+        if not symbol or  not shares:
+            return apology('Enter both symbol and shares')
+        elif shares.isdigit() == False:
+            return apology('not integer')
+        else:
+            # convert shares to int
+            shares = int(shares)
+            price = float(price)
+            total = shares * price
+            stock = lookup(symbol)
+            if not stock:
+                return apology('symbol not found')
+            symbol = stock['symbol']
+            # remove the following later. only for testing ===============
+            if not price:
+                price = stock['price']
+
+            # if shares are not 1 or more 
+            if shares < 1:
+                return apology('shares must be an integer greater than zero')
+            
+            else:
+                if transaction_type == 'buy':
+                    connection = sqlite3.connect('project.db')
+                    cursor = connection.cursor()
+                    cursor.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, total) VALUES (?, ?, ?, ?, ?, ?, ?)', (session['user_id'], symbol, shares, price, transaction_type, date, total))
+                    cursor.execute('INSERT INTO purchase_queue (user_id, symbol, quantity_left, price, total) VALUES (?, ?, ?, ?, ?)', (session['user_id'], symbol, shares, price, total))
+                    connection.commit()
+                    connection.close()
+                elif  transaction_type == 'sell':
+                    # calculate using FIFO the gains from this transaction
+                    # use a queue to store the purchase/buy transactions and you get their cost basis and subtract it from the total of the sale
+                    # each object stored in the queue could be a row resulting from an sql select statement or just a dictionary containing
+                    # the numbers of shares and the total price of the transaction, which we would obtain at first from a select statement
+                    # this queue should be stored in its own table so that it is persistant in memory.
+
+                    # retrieve the item from the queue
+                    rows = db.execute(
+                                    '''
+                                      SELECT purchase_id, symbol, quantity_left, proportional, total FROM purchase_queue 
+                                      WHERE user_id = ?
+                                      AND symbol = ?
+                                      '''
+                                      , session['user_id'], symbol)
+                    item = rows[0]
+                    # calculate profit from costSale - costPurchase
+                    sale_cost = price * shares
+                    purchase_cost = item['total']
+                    profit = sale_cost - purchase_cost
+                    print('profit is ', profit)
+                    if shares == item['quantity_left']:
+                        db.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, profit, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', session['user_id'], symbol, shares, price, transaction_type, date, profit, total)
+                        # then remove the row from the sale_queue, it has been dequeued
+                        db.execute('DELETE FROM purchase_queue WHERE purchase_id = ?', item['purchase_id'])
+
+                    else:
+                        return apology('something went wrong')
+                
+
+                # update portfolio
+                return redirect('/')
