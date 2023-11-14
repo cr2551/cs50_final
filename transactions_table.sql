@@ -10,6 +10,7 @@ CREATE TABLE transactions
     comments TEXT,
     transaction_date DATE,
     profit NUMERIC DEFAULT NULL, -- only for sales
+    dequeued BOOLEAN DEFAULT 0, -- only for purchases
     FOREIGN KEY(user_id) REFERENCES users(id)
     )
     ;

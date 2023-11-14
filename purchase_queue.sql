@@ -5,6 +5,7 @@
 CREATE TABLE purchase_queue 
     (
         purchase_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE ,
+        transaction_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
         symbol VARCHAR(255) NOT NULL,
         quantity_left INTEGER NOT NULL,
@@ -12,5 +13,6 @@ CREATE TABLE purchase_queue
         total NUMERIC NOT NULL,
         proportional BOOLEAN DEFAULT 0, -- indicates whether we sold the same amount of shares as the corrresponding transaction
         FOREIGN KEY(user_id) REFERENCES users(id)
+        FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id)
     )
 ;

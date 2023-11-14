@@ -19,7 +19,7 @@
             <th scope="col">Type</th>
             <th scope="col">Total</th>
             <th scope="col">Date</th>
-            <th scope="col">profit</th>
+            <th scope="col">Profit</th>
             </tr>
         </thead>
                 <tbody>
@@ -27,14 +27,44 @@
                     <tr>
                     <td>{{transaction.symbol}}</td>
                     <td>{{transaction.shares}}</td>
-                    <td>{{transaction.price}}</td>
+                    <td>{{transaction.price | usd }} <i class="bi bi-caret-down-fill" style="color:red"></i></td>
                     <td>{{transaction.transaction_type}}</td>
                     <td>{{ (transaction.price * transaction.shares) | usd }}</td>
                     <td>{{transaction.transaction_date}}</td>
-                    <td>{{transaction.profit}}</td>
+                    {% if transaction.profit != None %} 
+                    <td>
+                        <!-- <i class="bi bi-caret-down-fill "></i> -->
+                        <span class="profits">
+                            {{transaction.profit | usd}}
+                        </span>
+                    </td>
+                    {% else %}
+                    <td>
+                        {{transaction.profit }}</td>
+                        <!-- <i class="bi bi-caret-down-fill"></i> -->
+                    {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
         </table>
     {% endif %}
+    <script>
+        let profits = document.querySelectorAll('.profits');
+        profits.forEach( (element) => {
+            // js does care about the emoy space inside tha element unlike html
+            // if you don't call trim it will read the inner string with new lines if it has them.
+            profit = element.innerHTML.trim();
+            // remove the $ symbol at the beginning
+            profit = profit.slice(1);
+            // convert into float to see if it is a gain or a loss
+            profit = parseFloat(profit);
+            if (profit < 0) {
+                element.style.color = 'red';
+            }
+            else {
+                element.style.color = 'green';
+            }
+
+        });
+    </script>
 {% endblock %}

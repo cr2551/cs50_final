@@ -93,31 +93,35 @@ def get_portfolio(user_id):
 
     # calculate weighted average cost
     for stock in portfolio:
-        # find the the number of stocks you have bought over time and their price
+        # find the the number of stocks you have bought over time and their price that have not been dequeued
         purchases = db.execute('''
                         SELECT price, shares
                             FROM transactions 
                         WHERE user_id = ?
                         AND symbol = ?
                         AND transaction_type = "buy"
+                        AND dequeued = 0
                         ''', user_id, stock['symbol'])
 
-        quantity = len(purchases)        
         # find the total price you have paid
         total = 0
         for purchase in purchases:
             total += purchase['price'] * purchase['shares']
 
-        # calculate gain/ loss 
-        total_cost_purchase = db.execute('''
-                                         SELECT total FROM transactions WHERE user_id = ? AND transaction_type='buy'
-                                         AND symbol = ?
-                                         ''', session['user_id'], stock['symbol'])
+        quantity  = stock['quantity']
         # calculate wac: sum(Quantity*Price) / sum(Quantity)
+        # I am only calculating the wac for the purchases that have not been dequeued.
         wac  = total/quantity
         # add it to our portfolio dictionary
         stock['wac'] = wac
+        # then i will use the wac to calculate the avg return 
+        curr_quote = lookup(stock['symbol'])
+        # total return per share
+        total_return = (curr_quote['price'] - wac) 
+        # avg return represented in percentage, remember we are not using the stock we sold.
+        return_percentage  = (total_return / wac) * 100
+        stock['return_percentage'] = return_percentage
+
 
     return portfolio
     
-        

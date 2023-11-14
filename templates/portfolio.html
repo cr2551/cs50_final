@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    portfolio
+{% endblock %}
+
+{% block main %}
+<div class="spinner-border" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>
+    {{portfolio}}
+
+    
+
+    <script>
+        let spinner = document.querySelector('.spinner-border')
+        document.addEventListener('DOMContentLoaded', ()=> {
+            spinner.remove();
+        })
+    </script>
+{% endblock %}

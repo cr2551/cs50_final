@@ -1,3 +1,4 @@
+-- has nothing yet, probably not gonna use it
 CREATE TABLE portfolios
     (user_id, 
     symbol VARCHAR(255) NOT NULL,
@@ -6,3 +7,4 @@ CREATE TABLE portfolios
     gain_loss NUMERIC NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id)
     )
+;

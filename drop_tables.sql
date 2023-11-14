@@ -1,3 +1,3 @@
 DROP TABLE transactions;
--- DROP TABLE purchase_queue;
--- DROP TABLE portfolios;
+DROP TABLE purchase_queue;
+DROP TABLE portfolios;

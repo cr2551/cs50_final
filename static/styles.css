@@ -1,3 +1,31 @@
-a:active {
-    color: red;
+nav#mynav {
+    background-color: var(--bs-indigo);
 }
+
+a.navbar-brand,
+a.nav-link {
+    font-family: 'Merriweather', serif;
+}
+
+
+a:active {
+    color: rgb(155, 155, 155);
+}
+
+@media screen and (max-width: 600px) {
+    form.form-control {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        /* background-color: red; */
+    }
+}
+
+@media screen and (min-width:600px) {
+    select.form-select {
+        display: inline;
+        width: 10rem;
+    }
+
+}
+    

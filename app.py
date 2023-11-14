@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, session, request, render_template, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -138,7 +140,7 @@ def logout():
 def portfolio():
     portfolio = get_portfolio(session['user_id'])
     print(portfolio)
-    return apology('todo')
+    return render_template('portfolio.html', portfolio=portfolio, page='portfolio')
 
 
 
@@ -185,8 +187,16 @@ def add():
                 if transaction_type == 'buy':
                     connection = sqlite3.connect('project.db')
                     cursor = connection.cursor()
-                    cursor.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, total) VALUES (?, ?, ?, ?, ?, ?, ?)', (session['user_id'], symbol, shares, price, transaction_type, date, total))
-                    cursor.execute('INSERT INTO purchase_queue (user_id, symbol, quantity_left, price, total) VALUES (?, ?, ?, ?, ?)', (session['user_id'], symbol, shares, price, total))
+                    # insert purchase in transactions table and put its id in a variable
+                    transaction_id = db.execute('''INSERT INTO transactions 
+                                                (user_id, symbol, shares, price, transaction_type, transaction_date, total) 
+                                                VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                                                session['user_id'], symbol, shares, price, transaction_type, date, total
+                                                )
+
+                    print(transaction_id, '--------------------------')
+                    # put the transaction_id also in the purchase queue table. It will allow us to identify those transactions that have been dequeued.
+                    cursor.execute('INSERT INTO purchase_queue (user_id, transaction_id, symbol, quantity_left, price, total) VALUES (?, ?, ?, ?, ?, ?)', (session['user_id'], transaction_id, symbol, shares, price, total))
                     connection.commit()
                     connection.close()
                 elif  transaction_type == 'sell':
@@ -195,29 +205,52 @@ def add():
                     # each object stored in the queue could be a row resulting from an sql select statement or just a dictionary containing
                     # the numbers of shares and the total price of the transaction, which we would obtain at first from a select statement
                     # this queue should be stored in its own table so that it is persistant in memory.
-
-                    # retrieve the item from the queue
                     rows = db.execute(
-                                    '''
-                                      SELECT purchase_id, symbol, quantity_left, proportional, total FROM purchase_queue 
-                                      WHERE user_id = ?
-                                      AND symbol = ?
-                                      '''
-                                      , session['user_id'], symbol)
-                    item = rows[0]
-                    # calculate profit from costSale - costPurchase
-                    sale_cost = price * shares
-                    purchase_cost = item['total']
-                    profit = sale_cost - purchase_cost
-                    print('profit is ', profit)
-                    if shares == item['quantity_left']:
-                        db.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, profit, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', session['user_id'], symbol, shares, price, transaction_type, date, profit, total)
-                        # then remove the row from the sale_queue, it has been dequeued
-                        db.execute('DELETE FROM purchase_queue WHERE purchase_id = ?', item['purchase_id'])
+                            '''
+                                SELECT transaction_id, purchase_id, symbol, price, quantity_left, proportional, total FROM purchase_queue 
+                                WHERE user_id = ?
+                                AND symbol = ?
+                            '''
+                                , session['user_id'], symbol
+                        )
 
-                    else:
-                        return apology('something went wrong')
-                
+                    profit = 0
+                    # copy shares variable because ww will modify it later.
+                    shares_sold = shares
+                    # retrieve item from queue, the for loop ensures we can keep retrieving items from the queue when we need to sell
+                    # more shares than we bought in the corresponding transaction
+                    for i in range(len(rows)):
+                         
+                         item = rows[i]
+                         old_price = item['price']
+                         shares = item['quantity_left'] - shares
+                         if shares == 0:
+                            profit += (price - old_price) * item['quantity_left'] 
+                            db.execute('DELETE FROM purchase_queue WHERE purchase_id = ?', item['purchase_id'])
+                            # mark the transaction as dequeued from transactions table
+                            db.execute('UPDATE transactions SET dequeued = 1 WHERE transaction_id = ?', item['transaction_id'])
+                            break
 
+                         elif shares > 0:
+                            #update
+                            profit += (price - old_price) * (item['quantity_left'] - shares) 
+                            db.execute('''UPDATE purchase_queue SET quantity_left = ?, proportional = 1
+                                    WHERE purchase_id = ?''',shares, item['purchase_id'])
+                            break
+                         else:
+                            #delete
+                            db.execute('DELETE FROM purchase_queue WHERE purchase_id = ?', item['purchase_id'])
+                            # everytime we delete mark the transaction as dequeued in the transactions table
+                            db.execute('UPDATE transactions SET dequeued = 1 WHERE transaction_id = ?', item['transaction_id'])
+                            # flip the sign of the shares
+                            shares = -shares
+                            profit += (price - old_price) * (item['quantity_left'])
+
+                    what = db.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, profit, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', session['user_id'], symbol, shares_sold, price, transaction_type, date, profit, total)
+                    print('--------------------')
+                    print(what)
+                    print(type(what))
+
+                    
                 # update portfolio
-                return redirect('/')
+                return redirect('/history')
