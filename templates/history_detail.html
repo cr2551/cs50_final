@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Transaction Details
+{% endblock %}
+
+{% block main %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Shares</th>
+            <th>Type</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <td>{{detail.symbol}}</td>
+                <td>{{detail.price}}</td>
+                <td>{{detail.shares}}</td>
+                <td>{{detail.transaction_type}}</td>
+                <td>{{detail.total}}</td>
+                <td>{{detail.date}}</td>
+                <td>{{detail.profit}}</td>
+            </tr>
+
+        </tbody>
+    </table>
+    <div class="b-1">
+
+        <p>{{detail.comments}}</p>
+    </div>
+
+{% endblock %}

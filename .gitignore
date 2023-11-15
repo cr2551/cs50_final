@@ -1,5 +1,5 @@
 node_modules
-./package*
-./flask_session
-./.venv
-./__pycache__
+package*
+/flask_session
+.venv
+__pycache__

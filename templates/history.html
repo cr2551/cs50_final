@@ -25,9 +25,9 @@
                 <tbody>
                     {% for transaction in history %}
                     <tr>
-                    <td>{{transaction.symbol}}</td>
+                    <td> <a href="/history/{{transaction.transaction_id}}">details</a> {{transaction.symbol}}</td>
                     <td>{{transaction.shares}}</td>
-                    <td>{{transaction.price | usd }} <i class="bi bi-caret-down-fill" style="color:red"></i></td>
+                    <td>{{transaction.price | usd }} </td>
                     <td>{{transaction.transaction_type}}</td>
                     <td>{{ (transaction.price * transaction.shares) | usd }}</td>
                     <td>{{transaction.transaction_date}}</td>
@@ -40,12 +40,19 @@
                     </td>
                     {% else %}
                     <td>
-                        {{transaction.profit }}</td>
+                        N/A 
+                    </td>
                         <!-- <i class="bi bi-caret-down-fill"></i> -->
                     {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
+                <tfoot>
+                    <tr >
+                        <td class="fw-bold text-end border-0" colspan="6">TOTAL</td>
+                        <td class="profits border-0">{{total_profit | usd}}</td>
+                    </tr>
+                </tfoot>
         </table>
     {% endif %}
     <script>

@@ -90,23 +90,22 @@ def get_portfolio(user_id):
                GROUP BY symbol
                 HAVING quantity > 0
                ''', user_id)
-
+    total_portfolio_value = 0
+    total_gains = 0
     # calculate weighted average cost
     for stock in portfolio:
         # find the the number of stocks you have bought over time and their price that have not been dequeued
         purchases = db.execute('''
-                        SELECT price, shares
-                            FROM transactions 
+                        SELECT price, quantity_left
+                            FROM purchase_queue
                         WHERE user_id = ?
                         AND symbol = ?
-                        AND transaction_type = "buy"
-                        AND dequeued = 0
                         ''', user_id, stock['symbol'])
 
         # find the total price you have paid
         total = 0
         for purchase in purchases:
-            total += purchase['price'] * purchase['shares']
+            total += purchase['price'] * purchase['quantity_left']
 
         quantity  = stock['quantity']
         # calculate wac: sum(Quantity*Price) / sum(Quantity)
@@ -116,12 +115,29 @@ def get_portfolio(user_id):
         stock['wac'] = wac
         # then i will use the wac to calculate the avg return 
         curr_quote = lookup(stock['symbol'])
+        if not curr_quote:
+            return "could not retrieve stocks, try again."
         # total return per share
-        total_return = (curr_quote['price'] - wac) 
+        total_return = (curr_quote['price'] - wac)
+        # total unrealized gains, what would be the profit if the stock was sold right now 
+        gains = total_return * quantity
+        total_gains += gains
+        stock['gains'] = gains
         # avg return represented in percentage, remember we are not using the stock we sold.
         return_percentage  = (total_return / wac) * 100
+        return_percentage = round(return_percentage, 2)
         stock['return_percentage'] = return_percentage
+        # also add the current price to our portolio dictionary
+        stock['current_price'] = curr_quote['price']
+        # and add the total market value
+        total_value = curr_quote['price'] * quantity
+        stock['total_value'] = total_value
+        # add it towards the Total market value of the whole portfolio
+        total_portfolio_value += total_value
 
-
-    return portfolio
+    # now that you have the total add the percentage of the prtfolio that each stock occupies
+    for stock in portfolio:
+        diversification = stock['total_value']/total_portfolio_value * 100
+        stock['portfolio_diversity'] = round(diversification, 2)
+    return [portfolio, total_portfolio_value, total_gains]
     

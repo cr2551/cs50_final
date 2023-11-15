@@ -11,6 +11,7 @@ from cs50 import SQL
 db = SQL('sqlite:///project.db')
 
 app = Flask(__name__)
+import math
 
 app.jinja_env.filters['usd'] = usd
 
@@ -50,8 +51,12 @@ def history():
 
         cursor.execute('SELECT * FROM transactions WHERE user_id = ?', (session['user_id'],))
         history = cursor.fetchall()
-    # history = db.execute('SELECT * FROM transactions WHERE user_id = ?', session['user_id'])
-    return render_template('history.html' ,history=history, page='history')
+        total_profit = db.execute('''SELECT SUM(profit) AS total 
+                                   FROM transactions WHERE user_id = ? AND transaction_type="sell" ''', session['user_id'])
+    total_profit = total_profit[0]['total']
+    if total_profit is None:
+        total_profit = 0
+    return render_template('history.html' ,history=history, page='history', total_profit=total_profit)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -135,12 +140,11 @@ def logout():
     return redirect("/")
 
 
-@login_required
 @app.route('/portfolio')
+@login_required
 def portfolio():
-    portfolio = get_portfolio(session['user_id'])
-    print(portfolio)
-    return render_template('portfolio.html', portfolio=portfolio, page='portfolio')
+    portfolio, total, gains = get_portfolio(session['user_id'])
+    return render_template('portfolio.html', portfolio=portfolio, page='portfolio', total=total, gains=gains)
 
 
 
@@ -155,10 +159,10 @@ def add():
         symbol = request.form.get('symbol')
         shares = request.form.get('quantity')
         transaction_type = request.form.get('transaction_type')
+        comments = request.form.get('comments')
         price = request.form.get('price')
         # the price gets automatically converted to an integer when you givc it to the database as input even though
         # it is a string at the beginning.
-        print(type(price))
 
         date = request.form.get('date')
         # input validation
@@ -189,12 +193,11 @@ def add():
                     cursor = connection.cursor()
                     # insert purchase in transactions table and put its id in a variable
                     transaction_id = db.execute('''INSERT INTO transactions 
-                                                (user_id, symbol, shares, price, transaction_type, transaction_date, total) 
-                                                VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                                                session['user_id'], symbol, shares, price, transaction_type, date, total
+                                                (user_id, symbol, shares, price, transaction_type, transaction_date, total, comments) 
+                                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                                                session['user_id'], symbol, shares, price, transaction_type, date, total, comments
                                                 )
 
-                    print(transaction_id, '--------------------------')
                     # put the transaction_id also in the purchase queue table. It will allow us to identify those transactions that have been dequeued.
                     cursor.execute('INSERT INTO purchase_queue (user_id, transaction_id, symbol, quantity_left, price, total) VALUES (?, ?, ?, ?, ?, ?)', (session['user_id'], transaction_id, symbol, shares, price, total))
                     connection.commit()
@@ -219,8 +222,7 @@ def add():
                     shares_sold = shares
                     # retrieve item from queue, the for loop ensures we can keep retrieving items from the queue when we need to sell
                     # more shares than we bought in the corresponding transaction
-                    for i in range(len(rows)):
-                         
+                    for i in range(len(rows)):     
                          item = rows[i]
                          old_price = item['price']
                          shares = item['quantity_left'] - shares
@@ -230,7 +232,6 @@ def add():
                             # mark the transaction as dequeued from transactions table
                             db.execute('UPDATE transactions SET dequeued = 1 WHERE transaction_id = ?', item['transaction_id'])
                             break
-
                          elif shares > 0:
                             #update
                             profit += (price - old_price) * (item['quantity_left'] - shares) 
@@ -246,11 +247,14 @@ def add():
                             shares = -shares
                             profit += (price - old_price) * (item['quantity_left'])
 
-                    what = db.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, profit, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', session['user_id'], symbol, shares_sold, price, transaction_type, date, profit, total)
-                    print('--------------------')
-                    print(what)
-                    print(type(what))
-
+                    db.execute('INSERT INTO transactions (user_id, symbol, shares, price, transaction_type, transaction_date, profit, total, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', session['user_id'], symbol, shares_sold, price, transaction_type, date, profit, total, comments)
                     
-                # update portfolio
                 return redirect('/history')
+            
+
+@app.route('/history/<transaction_id>')
+@login_required
+def transaction_detail(transaction_id):
+    detail = db.execute('SELECT * FROM transactions WHERE transaction_id = ?', transaction_id)
+    return render_template('history_detail.html', detail=detail[0])
+    

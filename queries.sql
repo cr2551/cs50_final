@@ -1,2 +1,4 @@
-INSERT INTO dates (t_date) VALUES ('2023-11-15')
-;
+SELECT 
+    symbol
+    SUM(CASE WHEN transaction_type='buy' THEN shares ELSE -shares END) AS quantity
+    

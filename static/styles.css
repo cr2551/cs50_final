@@ -1,5 +1,11 @@
+main {
+    overflow-x: scroll;
+    
+}
+
+
 nav#mynav {
-    background-color: var(--bs-indigo);
+    position: sticky;
 }
 
 a.navbar-brand,
@@ -11,6 +17,12 @@ a.nav-link {
 a:active {
     color: rgb(155, 155, 155);
 }
+
+#comments {
+    /* display: none; */
+}
+
+
 
 @media screen and (max-width: 600px) {
     form.form-control {
@@ -25,6 +37,21 @@ a:active {
     select.form-select {
         display: inline;
         width: 10rem;
+    }
+
+    form#add-form {
+        margin: 0 20%;
+    }
+
+    #add-form-div {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .btn {
+        width: 20%;
+        
     }
 
 }

@@ -8,14 +8,91 @@
 <div class="spinner-border" role="status">
   <span class="visually-hidden">Loading...</span>
 </div>
-    {{portfolio}}
 
-    
+        <table class="table table-striped">
+        <thead>
+            <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Shares</th>
+            <th scope="col">AVG Price/share</th>
+            <th scope="col">Current Price</th>
+            <th scope="col">Return</th>
+            <th scope="col">Portfolio Diversity 
+                <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Indicates the percentage that this position occupies of your portfolio"></i>
+            </th>
+            <th scope="col">Gains</th>
+            <th scope="col">Total Value</th>
+            <!-- <th scope="col"></th>
+            <th scope="col">Date</th>
+            <th scope="col">Profit</th> -->
+            </tr>
+        </thead>
+                <tbody>
+                    {% for stock in  portfolio %}
+                    <tr>
+                    <td>{{stock.symbol}}</td>
+                    <td>{{stock.quantity}}</td>
+                    <td>{{stock.wac | usd }} </td>
+                    <td>{{stock.current_price | usd }} </td>
+                    <td>
+                        
+                        <i class="bi bi-caret-down-fill caret"></i>
+                        <span class="return">{{stock.return_percentage}}</span>%
+                    </td>
+                    <td>{{stock.portfolio_diversity}}%</td>
+                    <td class="gains">{{stock.gains | usd }} </td>
+                    <td>{{stock.total_value | usd }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="fw-bold text-end border-0" colspan="6" >Portfolio Total</td>
+                        <td class="border-0" id="total-gains">{{ gains | usd }}</td>
+                        <td class="border-0">{{ total | usd }}</td>
+                    </tr>
+                </tfoot>
+        </table>
 
     <script>
         let spinner = document.querySelector('.spinner-border')
         document.addEventListener('DOMContentLoaded', ()=> {
             spinner.remove();
-        })
+        });
+
+        let carets = document.querySelectorAll('.caret');
+        let returns = document.querySelectorAll('.return');
+        let gains = document.querySelectorAll('.gains');
+        let totalGains = document.getElementById('total-gains');
+        totalGainsVal = totalGains.textContent.slice(1);
+        console.log(totalGainsVal);
+        totalGainsVal = parseFloat(totalGainsVal);
+        if (totalGainsVal > 0) {
+            totalGains.style.color = 'green';
+        }
+
+        for (let i = 0; i < carets.length; i++) {
+            let gain = gains[i];
+            // gain = gain.slice(1)
+
+            let percentage = returns[i].innerHTML;
+            percentage = parseFloat(percentage);
+
+            if ( percentage < 0) {
+                carets[i].style.color = 'red';
+                gain.style.color = 'red';
+            }
+            else if (percentage > 0) {
+                carets[i].style.color = 'green';
+                gain.style.color = 'green';
+                
+                carets[i].classList = 'bi bi-caret-up-fill';
+            }
+
+        }
+        // initialize tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
     </script>
 {% endblock %}
