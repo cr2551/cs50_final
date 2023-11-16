@@ -18,10 +18,15 @@ a:active {
     color: rgb(155, 155, 155);
 }
 
-#comments {
-    /* display: none; */
+a {
+    text-decoration-line: none;
 }
 
+p {
+    min-width: min(20rem, 68ch);
+    max-width: 68ch;
+    margin: 0 auto;
+}
 
 
 @media screen and (max-width: 600px) {

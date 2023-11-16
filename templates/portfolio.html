@@ -9,22 +9,25 @@
   <span class="visually-hidden">Loading...</span>
 </div>
 
-        <table class="table table-striped">
+        <table class="table table-striped table-hover">
         <thead>
             <tr>
             <th scope="col">Name</th>
             <th scope="col">Shares</th>
             <th scope="col">AVG Price/share</th>
             <th scope="col">Current Price</th>
-            <th scope="col">Return</th>
+            <th scope="col">
+                
+                <a href="/portfolio?order=return_percentage">Return</a>
+            </th>
             <th scope="col">Portfolio Diversity 
                 <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Indicates the percentage that this position occupies of your portfolio"></i>
             </th>
-            <th scope="col">Gains</th>
+                <th scope="col">
+                <a href="/portfolio?order=gains">Gains</a>
+                </th>
+            </a>
             <th scope="col">Total Value</th>
-            <!-- <th scope="col"></th>
-            <th scope="col">Date</th>
-            <th scope="col">Profit</th> -->
             </tr>
         </thead>
                 <tbody>

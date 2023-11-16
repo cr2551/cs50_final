@@ -19,22 +19,46 @@
             </tr>
         </thead>
         <tbody>
-
             <tr>
                 <td>{{detail.symbol}}</td>
                 <td>{{detail.price}}</td>
                 <td>{{detail.shares}}</td>
                 <td>{{detail.transaction_type}}</td>
                 <td>{{detail.total}}</td>
-                <td>{{detail.date}}</td>
-                <td>{{detail.profit}}</td>
+                <td>{{detail.transaction_date}}</td>
+
+                {% if detail.profit == None %}
+                    <td>N\A</td>
+                {% else %}
+                    <td class="profits">{{detail.profit | usd}}</td>
+                {% endif %}
             </tr>
 
         </tbody>
     </table>
-    <div class="b-1">
-
+    <br>
+    Comments:
+    <div class="border border-light-subtle">
         <p>{{detail.comments}}</p>
     </div>
 
+    <script>
+        let profits = document.querySelectorAll('.profits');
+        profits.forEach( (element) => {
+            // js does care about the emoy space inside tha element unlike html
+            // if you don't call trim it will read the inner string with new lines if it has them.
+            profit = element.innerHTML.trim();
+            // remove the $ symbol at the beginning
+            profit = profit.slice(1);
+            // convert into float to see if it is a gain or a loss
+            profit = parseFloat(profit);
+            if (profit < 0) {
+                element.style.color = 'red';
+            }
+            else {
+                element.style.color = 'green';
+            }
+
+        });
+    </script>
 {% endblock %}

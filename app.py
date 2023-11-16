@@ -45,18 +45,33 @@ def index():
 @login_required
 def history():
     """Show history of transactions"""
-    with sqlite3.connect('project.db') as connection:
-        connection.row_factory = sqlite3.Row
-        cursor = connection.cursor()
+    order = request.args.get('order')
+    if not order:
+        order = 'transaction_id'
+    asc = ' ASC'
+    if order in ['transaction_date', 'profit', 'transaction_id']:
+        if order == 'transaction_id':
+            order = order + asc
+        else:
+            order = order + ' DESC'
+        transactions = db.execute(f'''SELECT * FROM transactions WHERE user_id = ?
+                        ORDER BY {order}'''
+                        , session['user_id'])
+    if order == 'profit':
+        sales = filter(lambda k: k[order] != None, transactions)
+        purchases = filter(lambda k: k[order] == None, transactions)
+        sales = list(sales)
+        purchases = list(purchases)
+        sales = sorted(sales, key=lambda k: k['profit'], reverse=True)
+        transactions = sales + purchases
 
-        cursor.execute('SELECT * FROM transactions WHERE user_id = ?', (session['user_id'],))
-        history = cursor.fetchall()
-        total_profit = db.execute('''SELECT SUM(profit) AS total 
+        # history = sorted(history, key=lambda k: k[order], reverse=False)
+    total_profit = db.execute('''SELECT SUM(profit) AS total 
                                    FROM transactions WHERE user_id = ? AND transaction_type="sell" ''', session['user_id'])
     total_profit = total_profit[0]['total']
     if total_profit is None:
         total_profit = 0
-    return render_template('history.html' ,history=history, page='history', total_profit=total_profit)
+    return render_template('history.html' ,history=transactions, page='history', total_profit=total_profit)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -142,8 +157,11 @@ def logout():
 
 @app.route('/portfolio')
 @login_required
-def portfolio():
+def portfolio_view():
     portfolio, total, gains = get_portfolio(session['user_id'])
+    order = request.args.get('order')
+    if order:
+        portfolio = sorted(portfolio, key=lambda k: k[order], reverse=True)
     return render_template('portfolio.html', portfolio=portfolio, page='portfolio', total=total, gains=gains)
 
 

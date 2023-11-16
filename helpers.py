@@ -116,7 +116,7 @@ def get_portfolio(user_id):
         # then i will use the wac to calculate the avg return 
         curr_quote = lookup(stock['symbol'])
         if not curr_quote:
-            return "could not retrieve stocks, try again."
+            return apology('could not retrieve quote')
         # total return per share
         total_return = (curr_quote['price'] - wac)
         # total unrealized gains, what would be the profit if the stock was sold right now 
@@ -139,5 +139,6 @@ def get_portfolio(user_id):
     for stock in portfolio:
         diversification = stock['total_value']/total_portfolio_value * 100
         stock['portfolio_diversity'] = round(diversification, 2)
+
     return [portfolio, total_portfolio_value, total_gains]
     
