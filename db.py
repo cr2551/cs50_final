@@ -17,7 +17,6 @@ def create_tables():
                 db.execute(q)
                 time.sleep(1)
     
-    print(trains)
 
 
 def drop_tables():
