@@ -1,3 +1,4 @@
-DROP TABLE transactions;
-DROP TABLE purchase_queue;
-DROP TABLE portfolios;
+DROP TABLE IF EXISTS purchase_queue;
+DROP TABLE IF EXISTS portfolios;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE  IF EXISTS users;

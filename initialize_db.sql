@@ -7,7 +7,7 @@ CREATE TABLE portfolios
     FOREIGN KEY(user_id) REFERENCES users(id)
     )
 ;
-    
+ 
 -- purpose of this table is to mantain a queue so that we can use the FIFO approach to calculating profits when we sell
 -- stock. That is, we will calculate profit assuming we are selling the oldest purchased stocks as opposed
 -- to seeling the most recently purchased stocks.

@@ -8,7 +8,12 @@ import sqlite3
 from helpers import lookup, usd, login_required, apology, get_portfolio
 from cs50 import SQL
 
-db = SQL('sqlite:///project.db')
+from .db import create_tables
+
+create_tables()
+
+# db = SQL('sqlite:///project.db')
+db = SQL('postgresql://project_irug_user:5l1wHrMhhXfg43dQ8z6G83ZkOoK3zvCb@dpg-clha696bbf9s73b0bhu0-a.oregon-postgres.render.com/project_irug')
 
 app = Flask(__name__)
 import math
