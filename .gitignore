@@ -3,3 +3,4 @@ package*
 /flask_session
 .venv
 __pycache__
+.vercel
