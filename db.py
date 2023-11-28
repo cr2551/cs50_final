@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 import sys
 
 print('python version: ', sys.version)
-ouput = os.popen('/opt/render/project/src/.venv/bin/python -m pip install --upgrade pip').read()
-print(ouput)
+# ouput = os.popen('/opt/render/project/src/.venv/bin/python -m pip install --upgrade pip').read()
+# print(ouput)
 
 load_dotenv()
 
@@ -51,8 +51,8 @@ def users():
     
     print(users, transactions, purchases)
     
-drop_tables()
-create_tables()
+# drop_tables()
+# create_tables()
 print_tables()
 users()
 

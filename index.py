@@ -50,13 +50,15 @@ if debug:
 
 
 
-if app.config['DEBUG'] == True:
-    url = 'sqlite:///project.db'
-    db = SQL(url)
-else:
-    url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
-    db = SQL(url)
+# if app.config['DEBUG'] == True:
+#     url = 'sqlite:///project.db'
+#     db = SQL(url)
+# else:
+#     url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
+#     db = SQL(url)
 
+url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
+db = SQL(url)
 
 users = db.execute('SELECT * FROM users')
 print(users, '-----------------------------------------------------------------||')
