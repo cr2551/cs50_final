@@ -4,3 +4,4 @@ package*
 .venv
 __pycache__
 .vercel
+.env

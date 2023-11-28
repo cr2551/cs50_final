@@ -1,10 +1,10 @@
 from cs50 import SQL
-import requests
-import sqlite3
-import psycopg2
 import time
+import os
 
-db = SQL('postgresql://project_irug_user:5l1wHrMhhXfg43dQ8z6G83ZkOoK3zvCb@dpg-clha696bbf9s73b0bhu0-a.oregon-postgres.render.com/project_irug')
+url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
+db = SQL(url)
+
 
 
 def create_tables():
@@ -33,8 +33,13 @@ def print_tables():
     tables = db.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
     for t in tables:
         print(t)
+
+def users():
+    users = db.execute('SELECT * FROM transactions;')
+    print(users)
     
 # drop_tables()
 # create_tables()
 print_tables()
+users()
 

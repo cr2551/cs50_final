@@ -1,22 +1,22 @@
 import os
+import logging
 
-from flask import Flask, session, request, render_template, redirect
+from flask import Flask, session, request, render_template, redirect 
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
+from dotenv import load_dotenv
+
 
 from helpers import lookup, usd, login_required, apology, get_portfolio
 from cs50 import SQL
 
-from .db import create_tables
+# from .db import create_tables
 
-# create_tables()
-
-# db = SQL('sqlite:///project.db')
-db = SQL('postgresql://project_irug_user:5l1wHrMhhXfg43dQ8z6G83ZkOoK3zvCb@dpg-clha696bbf9s73b0bhu0-a.oregon-postgres.render.com/project_irug')
+load_dotenv()
+debug = os.getenv('DEBUG')
 
 app = Flask(__name__)
-import math
 
 app.jinja_env.filters['usd'] = usd
 
@@ -32,15 +32,40 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-# create connection to database
+
+
+# log with gunicorn
+if app.config.get('LOG_WITH_UNICORN'):
+    gunicorn_error_loger  = logging.getLogger('gunicorn.error')
+    app.logger.handlers.extend(gunicorn_error_loger.handlers)
+    app.logger.setLevel(logging.DEBUG)
+else:
+    # use standard logging configuration
+    ...
+
+# print(dict(app.config))
+
+if debug:
+    app.config['DEBUG'] = True
+
+
+
+if app.config['DEBUG'] == True:
+    url = 'sqlite:///project.db'
+    db = SQL(url)
+else:
+    url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
+    db = SQL(url)
+
+
+
 
 @app.route('/', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def index():
     if request.method == 'GET':
-        return render_template('layout.html')
+        return render_template('landing_page.html')
     elif request.method == 'POST':
-        date = request.form.get('date')
         return render_template('layout.html', page='home')
     
             
@@ -110,17 +135,13 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-
     # Forget any user_id
     session.clear()
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
         # Ensure username was submitted
         if not request.form.get("username"):
             return apology("must provide username", 403)
-
         # Ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password", 403)
@@ -142,10 +163,26 @@ def login():
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/portfolio")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
+        # handle demo request
+        user = request.args.get('user')
+        if user == 'demo':
+            rows = db.execute('SELECT * from users WHERE username = ?', user)
+
+            if len(rows) != 1 or not check_password_hash(rows[0]["hash"], '0'):
+                return 'No valid username or password'
+            else:
+                # login demo user
+                session['user_id'] = rows[0]['id']
+                return redirect('/portfolio')
+
+
+            
+
+        # else return the login page.    
         return render_template("login.html", page='login')
 
 
