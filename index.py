@@ -128,7 +128,7 @@ def register():
             return apology('Username already Taken')
 
         hash = generate_password_hash(password)
-        db.execute('INSERT INTO users (username, hash) VALUES (?, ?)', (username, hash))
+        db.execute('INSERT INTO users (username, hash) VALUES (?, ?)', username, hash)
         return redirect('/login')
     
 @app.route("/login", methods=["GET", "POST"])
@@ -220,7 +220,7 @@ def add():
         # it is a string at the beginning.
 
         date = request.form.get('date')
-        # input validation
+        # input validationpermanent
         if not symbol or  not shares:
             return apology('Enter both symbol and shares')
         elif shares.isdigit() == False:
@@ -234,7 +234,7 @@ def add():
             if not stock:
                 return apology('symbol not found')
             symbol = stock['symbol']
-            # remove the following later. only for testing ===============
+
             if not price:
                 price = stock['price']
 
