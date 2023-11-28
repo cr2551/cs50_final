@@ -162,6 +162,7 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
+        print(session['user_id'], '----------------------------session user id ------------------------------', end="\n\n")
 
         # Redirect user to home page
         return redirect("/portfolio")

@@ -2,6 +2,11 @@ from cs50 import SQL
 import time
 import os
 from dotenv import load_dotenv
+import sys
+
+print('python version: ', sys.version)
+ouput = os.popen('/opt/render/project/src/.venv/bin/python -m pip install --upgrade pip').read()
+print(ouput)
 
 load_dotenv()
 
@@ -21,7 +26,7 @@ def create_tables():
         for q in queries:
             if q.strip():
                 db.execute(q)
-                time.sleep(1)
+                # time.sleep(1)
     
 
 
@@ -32,7 +37,6 @@ def drop_tables():
         print(queries)
         for q in queries:
             if q.strip():
-                # print('1')
                 db.execute(q)
 
 def print_tables():
@@ -41,11 +45,14 @@ def print_tables():
         print(t)
 
 def users():
-    users = db.execute('SELECT username FROM users;')
-    print(users)
+    users = db.execute('SELECT * FROM users;')
+    transactions = db.execute('SELECT * FROM transacts;')
+    purchases = db.execute('SELECT * FROM purchase_queue;')
     
-# drop_tables()
-# create_tables()
+    print(users, transactions, purchases)
+    
+drop_tables()
+create_tables()
 print_tables()
 users()
 
