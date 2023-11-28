@@ -2,7 +2,12 @@
 
 This is a portfolio tracker. Its purpose is to show you how your investments are performing at a glance compared to your initial expectations.
 
+#### Live website:
+
+<>
+
 #### Video Demo:
+
 <https://youtu.be/elKTg0OW574>
 
 In the Add Transactions tab you'll see a form where you can input the stocks the info about a purchase or sale you've made.
