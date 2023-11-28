@@ -1,8 +1,14 @@
 from cs50 import SQL
 import time
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
+internal_url = os.getenv('INTERNAL_DB_URL').replace('postgres://', 'postgresql://', 1)
+
+# db = SQL(internal_url)
 db = SQL(url)
 
 
@@ -35,7 +41,7 @@ def print_tables():
         print(t)
 
 def users():
-    users = db.execute('SELECT * FROM transactions;')
+    users = db.execute('SELECT username FROM users;')
     print(users)
     
 # drop_tables()

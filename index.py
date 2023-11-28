@@ -58,7 +58,8 @@ else:
     db = SQL(url)
 
 
-
+users = db.execute('SELECT * FROM users')
+print(users, '-----------------------------------------------------------------||')
 
 @app.route('/', methods=['GET', 'POST'])
 # @login_required
@@ -130,7 +131,7 @@ def register():
         connection.commit()
         connection.close()
         
-        return redirect('/')
+        return redirect('/login')
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
