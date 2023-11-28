@@ -17,6 +17,10 @@ internal_url = os.getenv('INTERNAL_DB_URL').replace('postgres://', 'postgresql:/
 # db = SQL(internal_url)
 db = SQL(url)
 
+def test_table():
+    query = 'CREATE TABLE test_hi (num INT);'
+    db.execute(query)
+
 
 
 def create_tables():
@@ -26,6 +30,7 @@ def create_tables():
         queries = queries.split(';') 
         for q in queries:
             if q.strip():
+                print(q)
                 db.execute(q)
                 # time.sleep(1)
     
@@ -47,13 +52,14 @@ def print_tables():
 
 def users():
     users = db.execute('SELECT * FROM users;')
-    transactions = db.execute('SELECT * FROM transacts;')
+    transactions = db.execute('SELECT * FROM transactions;')
     purchases = db.execute('SELECT * FROM purchase_queue;')
     
     print(users, transactions, purchases)
     
-# drop_tables()
-# create_tables()
+drop_tables()
+create_tables()
+test_table()
 print_tables()
 users()
 

@@ -4,7 +4,6 @@ import logging
 from flask import Flask, session, request, render_template, redirect 
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-import sqlite3
 from dotenv import load_dotenv
 
 
@@ -124,18 +123,12 @@ def register():
         if password != confirmation:
             return apology('password mismatch')
         # check if username already taken
-        connection = sqlite3.connect('project.db')
-        cursor = connection.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
-        rows = cursor.fetchall()
+        rows = db.execute('SELECT * FROM users WHERE username = ?', username)
         if len(rows) != 0:
             return apology('Username already Taken')
 
         hash = generate_password_hash(password)
-        cursor.execute('INSERT INTO users (username, hash) VALUES (?, ?)', (username, hash))
-        connection.commit()
-        connection.close()
-        
+        db.execute('INSERT INTO users (username, hash) VALUES (?, ?)', (username, hash))
         return redirect('/login')
     
 @app.route("/login", methods=["GET", "POST"])
@@ -152,14 +145,9 @@ def login():
         elif not request.form.get("password"):
             return apology("must provide password", 403)
 
-        connection = sqlite3.connect('project.db')
-        connection.row_factory = sqlite3.Row
-        cursor = connection.cursor()
         # Query database for username
         username = request.form.get('username')
-        cursor.execute("SELECT * FROM users WHERE username = ?", (username, ))
-        rows = cursor.fetchall()
-        connection.close()
+        rows = db.execute("SELECT * FROM users WHERE username = ?", username)
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
@@ -256,8 +244,6 @@ def add():
             
             else:
                 if transaction_type == 'buy':
-                    connection = sqlite3.connect('project.db')
-                    cursor = connection.cursor()
                     # insert purchase in transactions table and put its id in a variable
                     transaction_id = db.execute('''INSERT INTO transactions 
                                                 (user_id, symbol, shares, price, transaction_type, transaction_date, total, comments) 
@@ -266,9 +252,7 @@ def add():
                                                 )
 
                     # put the transaction_id also in the purchase queue table. It will allow us to identify those transactions that have been dequeued.
-                    cursor.execute('INSERT INTO purchase_queue (user_id, transaction_id, symbol, quantity_left, price, total) VALUES (?, ?, ?, ?, ?, ?)', (session['user_id'], transaction_id, symbol, shares, price, total))
-                    connection.commit()
-                    connection.close()
+                    db.execute('INSERT INTO purchase_queue (user_id, transaction_id, symbol, quantity_left, price, total) VALUES (?, ?, ?, ?, ?, ?)', session['user_id'], transaction_id, symbol, shares, price, total)
                 elif  transaction_type == 'sell':
                     # calculate using FIFO the gains from this transaction
                     # use a queue to store the purchase/buy transactions and you get their cost basis and subtract it from the total of the sale

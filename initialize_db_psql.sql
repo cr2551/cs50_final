@@ -5,16 +5,7 @@ CREATE TABLE users (
     hash TEXT NOT NULL,
     cash NUMERIC NOT NULL DEFAULT 0
 );
-    -- Create portfolios table
-CREATE TABLE portfolios (
-    user_id INTEGER REFERENCES users(id),
-    symbol VARCHAR(255) NOT NULL,
-    shares NUMERIC NOT NULL,
-    price FLOAT NOT NULL,
-    gain_loss NUMERIC NOT NULL,
-    PRIMARY KEY (user_id, symbol)
-);
-
+ 
 -- Create transactions table
 CREATE TABLE transactions (
     transact_id SERIAL PRIMARY KEY,
@@ -41,9 +32,9 @@ CREATE TABLE purchase_queue (
     quantity_left INTEGER NOT NULL,
     price NUMERIC NOT NULL,
     total NUMERIC NOT NULL,
-    proportional BOOLEAN DEFAULT FALSE, -- changed to FALSE as BOOLEAN does not use 0 or 1 in PostgreSQL
+    proportional BOOLEAN DEFAULT FALSE,
     FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(transact_id) REFERENCES transacts(transact_id)
+    FOREIGN KEY(transact_id) REFERENCES transactions(transact_id)
 );
 
 

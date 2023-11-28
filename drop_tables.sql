@@ -2,4 +2,5 @@ DROP TABLE IF EXISTS purchase_queue ;
 DROP TABLE IF EXISTS portfolios ;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS transacts;
+DROP TABLE IF EXISTS test_hi;
 DROP TABLE  IF EXISTS users CASCADE;
