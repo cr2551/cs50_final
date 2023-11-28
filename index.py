@@ -16,6 +16,9 @@ from cs50 import SQL
 load_dotenv()
 debug = os.getenv('DEBUG')
 
+pip_version = os.popen('pip -V').read()
+print('----------------------pip version: ', pip_version)
+
 app = Flask(__name__)
 
 app.jinja_env.filters['usd'] = usd

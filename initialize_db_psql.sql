@@ -16,7 +16,7 @@ CREATE TABLE portfolios (
 );
 
 -- Create transactions table
-CREATE TABLE transacts (
+CREATE TABLE transactions (
     transact_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
     symbol VARCHAR(255) NOT NULL,

@@ -15,15 +15,10 @@ Flask-Session
 greenlet
 gunicorn
 idna
-ipykernel
-ipython
 itsdangerous
 jedi
 Jinja2
-jupyter_client
-jupyter_core
 MarkupSafe
-matplotlib-inline
 nest-asyncio
 packaging
 parso

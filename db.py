@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import sys
 
+
 print('python version: ', sys.version)
 # ouput = os.popen('/opt/render/project/src/.venv/bin/python -m pip install --upgrade pip').read()
 # print(ouput)
