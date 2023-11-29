@@ -16,7 +16,6 @@ load_dotenv()
 debug = os.getenv('DEBUG')
 
 pip_version = os.popen('pip -V').read()
-print('----------------------pip version: ', pip_version)
 
 app = Flask(__name__)
 
@@ -45,7 +44,6 @@ else:
     # use standard logging configuration
     ...
 
-# print(dict(app.config))
 
 if debug:
     app.config['DEBUG'] = True
@@ -62,8 +60,6 @@ if debug:
 url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
 db = SQL(url)
 
-users = db.execute('SELECT * FROM users')
-print(users, '-----------------------------------------------------------------||')
 
 @app.route('/', methods=['GET', 'POST'])
 # @login_required
@@ -102,7 +98,11 @@ def history():
 
         # history = sorted(history, key=lambda k: k[order], reverse=False)
     total_profit = db.execute('''SELECT SUM(profit) AS total 
-                                   FROM transactions WHERE user_id = ? AND transaction_type="sell" ''', session['user_id'])
+                                   FROM transactions 
+                                WHERE user_id = ? 
+                                    AND transaction_type = 'sell' 
+                              ''', session['user_id'])
+
     total_profit = total_profit[0]['total']
     if total_profit is None:
         total_profit = 0
@@ -155,7 +155,6 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
-        print(session['user_id'], '----------------------------session user id ------------------------------', end="\n\n")
 
         # Redirect user to home page
         return redirect("/portfolio")
@@ -176,7 +175,6 @@ def login():
 
 
             
-
         # else return the login page.    
         return render_template("login.html", page='login')
 
@@ -195,7 +193,7 @@ def logout():
 @app.route('/portfolio')
 @login_required
 def portfolio_view():
-    portfolio, total, gains = get_portfolio(session['user_id'])
+    portfolio, total, gains = get_portfolio(session['user_id'], url)
     order = request.args.get('order')
     if order:
         portfolio = sorted(portfolio, key=lambda k: k[order], reverse=True)

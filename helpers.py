@@ -5,7 +5,6 @@ import requests
 import subprocess
 import urllib
 import uuid
-import sqlite3
 
 from flask import redirect, render_template, session
 from functools import wraps
@@ -79,16 +78,17 @@ def usd(value):
     return f"${value:,.2f}"
 
 
-def get_portfolio(user_id):
+def get_portfolio(user_id, url):
     """Infer portfolio holdings from transactions History"""
-    db = SQL('sqlite:///project.db')
+    # db = SQL('sqlite:///project.db')
+    db = SQL(url)
     portfolio = db.execute('''
                 SELECT symbol,
-               SUM(CASE WHEN transaction_type = 'buy' THEN shares ELSE -shares END) AS quantity
+                    SUM(CASE WHEN transaction_type = 'buy' THEN shares ELSE -shares END) AS quantity
                 FROM transactions
-               WHERE user_id = ?
-               GROUP BY symbol
-                HAVING quantity > 0
+                    WHERE user_id = ?
+                GROUP BY symbol
+                    HAVING SUM(CASE WHEN transaction_type = 'buy' THEN shares ELSE -shares END) > 0
                ''', user_id)
     total_portfolio_value = 0
     total_gains = 0
