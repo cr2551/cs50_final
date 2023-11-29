@@ -57,8 +57,8 @@ def users():
     
     print(users, transactions, purchases)
     
-# drop_tables()
-# create_tables()
+drop_tables()
+create_tables()
 # test_table()
 # print_tables()
 # users()

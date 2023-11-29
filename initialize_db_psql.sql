@@ -9,7 +9,7 @@ CREATE TABLE users (
 -- Create transactions table
 CREATE TABLE transactions (
     transaction_id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     symbol VARCHAR(255) NOT NULL,
     shares INTEGER NOT NULL,
     price NUMERIC NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE transactions (
     comments TEXT,
     transaction_date DATE,
     profit NUMERIC DEFAULT NULL,
-    dequeued BOOLEAN DEFAULT FALSE
+    dequeued BOOLEAN DEFAULT false
 );
 
     -- FOREIGN KEY(user_id) REFERENCES users(id)
@@ -27,14 +27,14 @@ CREATE TABLE transactions (
 CREATE TABLE purchase_queue (
     purchase_id SERIAL PRIMARY KEY,
     transaction_id INTEGER NOT NULL,
-    user_id INTEGER REFERENCES users(id),
+    user_id INTEGER,
     symbol VARCHAR(255) NOT NULL,
     quantity_left INTEGER NOT NULL,
     price NUMERIC NOT NULL,
     total NUMERIC NOT NULL,
-    proportional BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id)
+    proportional BOOLEAN DEFAULT false,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE
 );
 
 

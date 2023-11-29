@@ -58,6 +58,7 @@ if debug:
 #     db = SQL(url)
 
 url = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
+print(url, '----------------url----------------')
 db = SQL(url)
 
 
@@ -284,14 +285,14 @@ def add():
                          elif shares > 0:
                             #update
                             profit += (price - old_price) * (item['quantity_left'] - shares) 
-                            db.execute('''UPDATE purchase_queue SET quantity_left = ?, proportional = 1
+                            db.execute('''UPDATE purchase_queue SET quantity_left = ?, proportional = true
                                     WHERE purchase_id = ?''',shares, item['purchase_id'])
                             break
                          else:
                             #delete
                             db.execute('DELETE FROM purchase_queue WHERE purchase_id = ?', item['purchase_id'])
                             # everytime we delete mark the transaction as dequeued in the transactions table
-                            db.execute('UPDATE transactions SET dequeued = 1 WHERE transaction_id = ?', item['transaction_id'])
+                            db.execute('UPDATE transactions SET dequeued = true WHERE transaction_id = ?', item['transaction_id'])
                             # flip the sign of the shares
                             shares = -shares
                             profit += (price - old_price) * (item['quantity_left'])
