@@ -1,11 +1,20 @@
 {% extends "layout.html" %}
-
 {% block title %}
 
 {% endblock %}
 
+<!-- extend styles -->
+{% block head %}
+    <link rel="stylesheet" href="../static/landing_page.css">
+{% endblock %}
+
 {% block main %}
-<h1>Welcome to Portfolio Tracker</h1>
+<section id="hero-section">
+    <img src="../static/images/finview.png" alt="" class="img-fluid">
+    <h1>Welcome to Portfolio Tracker</h1>
+
+</section>
+<!-- <img src="../static/images/finview.png" alt=""> -->
 
 
 {% endblock %}

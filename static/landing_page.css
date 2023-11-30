@@ -1,0 +1,20 @@
+main.container-fluid {
+    padding: 0;
+    padding-top: 0 !important;
+}
+
+
+/* section#hero-section {
+    background-image: url('./images/finview.png');
+    background-repeat: no-repeat;
+    height: 100vh;
+    /* width: fit-content; */
+    /* background-size: cover; */
+    
+    /* width: 100vw; */
+/* }  */
+
+img {
+    height: 20vh;
+    scale: .8;
+}
