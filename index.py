@@ -11,6 +11,7 @@ from helpers import lookup, usd, login_required, apology, get_portfolio
 from cs50 import SQL
 
 # from .db import create_tables
+from misc import my_lookup
 
 load_dotenv()
 debug = os.getenv('DEBUG')
@@ -308,3 +309,7 @@ def transaction_detail(transaction_id):
     detail = db.execute('SELECT * FROM transactions WHERE transaction_id = ?', transaction_id)
     return render_template('history_detail.html', detail=detail[0])
     
+@app.route('/charts')
+def chart_view():
+    prices, dates = my_lookup('AAPL') 
+    return render_template('chart_test.html', prices = prices, dates=dates)

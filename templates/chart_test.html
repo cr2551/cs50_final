@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block main %}
+hi!
+<div>
+    <canvas id="myChart"></canvas>
+</div>
+<div id="prices">{{prices}}</div>
+<div id="dates">{{dates}}</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let prices = document.getElementById('prices').textContent;
+    let dates = document.getElementById('dates').textContent;
+    let cleanDates = dates.replace(/[\[\]\']+/g, '');
+    dates = cleanDates.split(', ')
+    pricesArray = JSON.parse(prices)
+    console.log(dates);
+    console.log(typeof dates);
+    // dates = JSON.parse(dates)
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            // labels: ['Red', 'Blue', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: 'price',
+                // data: [bar12, 9, 3, 5, 2],
+                data: pricesArray ,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                // y: {
+                //     beginAtZero: true
+                // }
+            }
+        }
+    })
+</script>
+{% endblock %}
+
